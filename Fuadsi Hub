@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FUADSI Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            500: '#8a2be2',
+                            600: '#7209b7',
+                        },
+                        secondary: {
+                            500: '#4cc9f0',
+                            600: '#4361ee',
+                        },
+                        accent: {
+                            500: '#ffd700',
+                        },
+                        dark: {
+                            800: '#121212',
+                            900: '#0a0a0a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            overflow: hidden;
+        }
+        .mobile-frame {
+            width: 375px;
+            height: 812px;
+            background: #121212;
+            border-radius: 48px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+            border: 10px solid #1e1e1e;
+        }
+        .status-bar {
+            height: 44px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(30, 30, 30, 0.95);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 20%;
+            padding: 6px 0;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .nav-item.active {
+            background: rgba(138, 43, 226, 0.15);
+        }
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            width: 24px;
+            height: 4px;
+            background: linear-gradient(to right, #8a2be2, #4cc9f0, #ffd700);
+            border-radius: 2px;
+        }
+        .story-item {
+            min-width: 72px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-right: 12px;
+        }
+        .story-border {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #8a2be2, #4cc9f0, #ffd700);
+            padding: 2px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .story-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(120deg, #2c2c3a 0%, #3a3a4a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            color: #ffd700;
+            font-size: 18px;
+        }
+        .post-card {
+            border-radius: 24px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        .post-card:hover {
+            transform: translateY(-2px);
+        }
+        .post-content {
+            height: 320px;
+            background: linear-gradient(45deg, #2c2c3a 0%, #3a3a4a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .post-media {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+        .post-overlay {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 16px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .camera-screen {
+            background: linear-gradient(0deg, #0f0f1b 0%, #1a1a2e 50%, #0f0f1b 100%);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .camera-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .camera-controls {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            padding: 0 32px 24px;
+        }
+        .camera-btn {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            transition: all 0.2s ease;
+        }
+        .camera-btn:active {
+            transform: scale(0.95);
+        }
+        .message-bubble {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            position: relative;
+            line-height: 1.4;
+        }
+        .message-bubble.sent {
+            background: linear-gradient(to right, #8a2be2, #4cc9f0);
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        .message-bubble.received {
+            background: rgba(255, 255, 255, 0.1);
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+        }
+        .profile-grid-item {
+            height: 120px;
+            background: linear-gradient(45deg, #2c2c3a 0%, #3a3a4a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            color: #ffd700;
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-grid-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.85;
+        }
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #8a2be2, #4cc9f0, #ffd700);
+        }
+        .logo-text {
+            font-weight: 800;
+            font-size: 18px;
+            background: linear-gradient(to right, #8a2be2, #4cc9f0, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -1px;
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(138, 43, 226, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(138, 43, 226, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(138, 43, 226, 0); }
+        }
+        .typing-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ffd700;
+            margin: 0 1.5px;
+        }
+        .typing-indicator:nth-child(2) {
+            animation: bounce 1.4s infinite 0.2s;
+        }
+        .typing-indicator:nth-child(3) {
+            animation: bounce 1.4s infinite 0.4s;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-up {
+            animation: slideUp 0.5s ease-out forwards;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .online-badge {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00ff00;
+            border: 2px solid #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .online-badge::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff00;
+            animation: pulseOnline 2s infinite;
+        }
+        @keyframes pulseOnline {
+            0% { opacity: 0.8; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 0.8; transform: scale(0.8); }
+        }
+        .login-screen {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #0f0f1b 0%, #1a1a2e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+        }
+        .login-screen.hidden {
+            display: none;
+        }
+        .auth-form {
+            width: 100%;
+            max-width: 320px;
+            background: rgba(30, 30, 40, 0.9);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        .auth-input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: rgba(40, 40, 50, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 16px;
+            transition: border-color 0.3s;
+        }
+        .auth-input:focus {
+            outline: none;
+            border-color: #8a2be2;
+        }
+        .auth-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            background: linear-gradient(to right, #8a2be2, #4cc9f0);
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: transform 0.2s;
+        }
+        .auth-btn:active {
+            transform: scale(0.98);
+        }
+        .auth-switch {
+            background: none;
+            border: none;
+            color: #8a2be2;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+        .like-btn.active {
+            color: #ff4d4d;
+            transform: scale(1.2);
+        }
+        .follow-btn {
+            background: linear-gradient(to right, #8a2be2, #4cc9f0);
+        }
+        .follow-btn.following {
+            background: rgba(255, 255, 255, 0.15);
+            color: #aaa;
+        }
+        .media-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .media-option {
+            flex: 1;
+            padding: 12px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .media-option.active {
+            border-color: #8a2be2;
+            background: rgba(138, 43, 226, 0.1);
+        }
+        .media-preview {
+            width: 100%;
+            height: 200px;
+            border-radius: 16px;
+            background: rgba(40, 40, 50, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        .media-preview img, .media-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .logout-btn {
+            background: rgba(220, 50, 50, 0.2);
+            color: #ff8888;
+            width: 100%;
+            padding: 14px;
+            border-radius: 16px;
+            border: none;
+            font-weight: 500;
+            margin-top: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .logout-btn:hover {
+            background: rgba(220, 50, 50, 0.3);
+        }
+        .user-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .user-badge span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff00;
+        }
+        .comment-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .comment-section.active {
+            max-height: 500px;
+        }
+        .comment-input {
+            display: flex;
+            padding: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .comment-input input {
+            flex: 1;
+            background: rgba(40, 40, 50, 0.8);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            color: white;
+        }
+        .comment-input button {
+            background: #8a2be2;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            color: white;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-frame">
+        <!-- Login Screen -->
+        <div id="login-screen" class="login-screen">
+            <div class="logo-container mb-8">
+                <span class="logo-text text-3xl">FH</span>
+            </div>
+            <div class="auth-form">
+                <h1 class="text-2xl font-bold text-white text-center mb-6">Welcome to FUADSI Hub</h1>
+                <input type="email" id="login-email" class="auth-input" placeholder="Email address" value="user@fuadsi.com">
+                <input type="password" id="login-password" class="auth-input" placeholder="Password" value="password123">
+                <button id="login-btn" class="auth-btn">Log In</button>
+                <button id="signup-btn" class="auth-btn" style="background: rgba(255,255,255,0.1); margin-top: 16px">Create New Account</button>
+                <button class="auth-switch" id="guest-btn">Continue as Guest</button>
+            </div>
+            <div class="text-center mt-8 text-gray-400 text-sm">
+                <p>By continuing, you agree to our <span class="text-purple-400">Terms of Service</span> and <span class="text-purple-400">Privacy Policy</span></p>
+            </div>
+        </div>
+
+        <!-- Main App Container -->
+        <div id="app-container" class="hidden">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <span class="text-xs font-medium text-gray-300">9:41</span>
+                </div>
+                <div class="flex items-center space-x-1.5">
+                    <div class="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+                    <div class="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+                    <div class="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+                    <span class="text-xs font-medium text-gray-300 ml-1">LTE</span>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="absolute top-11 bottom-16 left-0 right-0 overflow-y-auto bg-dark-900">
+                <!-- Home Feed Tab (Active by default) -->
+                <div id="home-tab" class="p-4 space-y-6">
+                    <!-- Stories Section -->
+                    <div class="flex space-x-2 pb-4">
+                        <div class="story-item">
+                            <div class="story-border pulse">
+                                <div class="story-avatar">FH</div>
+                            </div>
+                            <span class="text-xs font-medium text-white">Your Story</span>
+                        </div>
+                        <div class="story-item">
+                            <div class="story-border">
+                                <div class="story-avatar" style="background: linear-gradient(120deg, #3a3a4a 0%, #2c2c3a 100%); color: #8a2be2;">AL</div>
+                            </div>
+                            <span class="text-xs font-medium text-gray-300">Alex</span>
+                        </div>
+                        <div class="story-item">
+                            <div class="story-border">
+                                <div class="story-avatar" style="background: linear-gradient(120deg, #3a3a4a 0%, #2c2c3a 100%); color: #4cc9f0;">MJ</div>
+                            </div>
+                            <span class="text-xs font-medium text-gray-300">Maria</span>
+                        </div>
+                        <div class="story-item">
+                            <div class="story-border">
+                                <div class="story-avatar" style="background: linear-gradient(120deg, #3a3a4a 0%, #2c2c3a 100%); color: #ffd700;">JK</div>
+                            </div>
+                            <span class="text-xs font-medium text-gray-300">Jake</span>
+                        </div>
+                        <div class="story-item">
+                            <div class="story-border">
+                                <div class="story-avatar" style="background: linear-gradient(120deg, #3a3a4a 0%, #2c2c3a 100%); color: #ff6b6b;">SY</div>
+                            </div>
+                            <span class="text-xs font-medium text-gray-300">Sophie</span>
+                        </div>
+                    </div>
+
+                    <!-- Posts Feed -->
+                    <div id="posts-container" class="space-y-4">
+                        <!-- Post 1 -->
+                        <div class="post-card bg-dark-800 border border-gray-800">
+                            <div class="p-4 border-b border-gray-800 flex items-center space-x-3">
+                                <div class="relative">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center text-white font-bold">A</div>
+                                    <div class="online-badge"></div>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-white">Alex Rivera</p>
+                                    <p class="text-xs text-gray-400">2 hours ago</p>
+                                </div>
+                                <div class="ml-auto text-gray-400 text-lg">⋯</div>
+                            </div>
+                            <div class="post-content">
+                                <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" alt="Bali Beach" class="post-media" style="display:block">
+                                <div class="post-overlay">
+                                    <span class="text-xs font-medium text-white">Travel Moments</span>
+                                    <span class="text-xs font-medium text-accent-500">0:15</span>
+                                </div>
+                                <div class="user-badge">
+                                    <span></span>
+                                    <span>Alex</span>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <p class="text-white mb-3">Exploring the hidden beaches of Bali! 🌴✨ #TravelDiaries</p>
+                                <div class="flex justify-between text-gray-400">
+                                    <div class="flex space-x-4">
+                                        <button class="like-btn flex items-center space-x-1 hover:text-red-400 transition">
+                                            <span>♡</span>
+                                            <span class="like-count">245</span>
+                                        </button>
+                                        <button class="flex items-center space-x-1 hover:text-blue-400 transition comment-toggle">
+                                            <span>💬</span>
+                                            <span>32</span>
+                                        </button>
+                                    </div>
+                                    <button class="hover:text-purple-400 transition">↪️</button>
+                                </div>
+                                <div class="comment-section mt-3">
+                                    <div class="space-y-2 mb-2 max-h-48 overflow-y-auto">
+                                        <div class="flex space-x-2">
+                                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex-shrink-0"></div>
+                                            <div>
+                                                <p class="text-white"><span class="font-bold">Maria</span> Wow! This looks amazing! 😍</p>
+                                                <p class="text-xs text-gray-400 mt-1">1 hour ago</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex-shrink-0"></div>
+                                            <div>
+                                                <p class="text-white"><span class="font-bold">Jake</span> Adding this to my bucket list!</p>
+                                                <p class="text-xs text-gray-400 mt-1">45 mins ago</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="comment-input">
+                                        <input type="text" placeholder="Add a comment..." class="comment-field">
+                                        <button class="add-comment">➤</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Post 2 -->
+                        <div class="post-card bg-dark-800 border border-gray-800">
+                            <div class="p-4 border-b border-gray-800 flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold">MJ</div>
+                                <div>
+                                    <p class="font-bold text-white">Maria Johnson</p>
+                                    <p class="text-xs text-gray-400">5 hours ago</p>
+                                </div>
+                                <div class="ml-auto text-gray-400 text-lg">⋯</div>
+                            </div>
+                            <div class="post-content">
+                                <img src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" alt="Coffee" class="post-media" style="display:block">
+                                <div class="user-badge">
+                                    <span></span>
+                                    <span>Maria</span>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <p class="text-white mb-3">Sunday coffee ritual with my favorite book 📚☕️ #SlowLiving</p>
+                                <div class="flex justify-between text-gray-400">
+                                    <div class="flex space-x-4">
+                                        <button class="like-btn active flex items-center space-x-1 hover:text-red-400 transition">
+                                            <span>❤️</span>
+                                            <span class="like-count">190</span>
+                                        </button>
+                                        <button class="flex items-center space-x-1 hover:text-blue-400 transition comment-toggle">
+                                            <span>💬</span>
+                                            <span>17</span>
+                                        </button>
+                                    </div>
+                                    <button class="hover:text-purple-400 transition">↪️</button>
+                                </div>
+                                <div class="comment-section mt-3">
+                                    <div class="space-y-2 mb-2 max-h-48 overflow-y-auto">
+                                        <div class="flex space-x-2">
+                                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex-shrink-0"></div>
+                                            <div>
+                                                <p class="text-white"><span class="font-bold">Alex</span> What book are you reading?</p>
+                                                <p class="text-xs text-gray-400 mt-1">3 hours ago</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="comment-input">
+                                        <input type="text" placeholder="Add a comment..." class="comment-field">
+                                        <button class="add-comment">➤</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Post 3 -->
+                        <div class="post-card bg-dark-800 border border-gray-800">
+                            <div class="p-4 border-b border-gray-800 flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold">JK</div>
+                                <div>
+                                    <p class="font-bold text-white">Jake Kim</p>
+                                    <p class="text-xs text-gray-400">Yesterday</p>
+                                </div>
+                                <div class="ml-auto text-gray-400 text-lg">⋯</div>
+                            </div>
+                            <div class="post-content">
+                                <video poster="https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="post-media" style="display:block" muted>
+                                    <source src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" type="video/mp4">
+                                </video>
+                                <div class="post-overlay">
+                                    <span class="text-xs font-medium text-white">Gaming Setup</span>
+                                    <span class="text-xs font-medium text-accent-500">1:22</span>
+                                </div>
+                                <div class="user-badge">
+                                    <span></span>
+                                    <span>Jake</span>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <p class="text-white mb-3">New RGB setup finally complete! Ready for tonight's stream 🌈✨ #GamerLife</p>
+                                <div class="flex justify-between text-gray-400">
+                                    <div class="flex space-x-4">
+                                        <button class="like-btn flex items-center space-x-1 hover:text-red-400 transition">
+                                            <span>♡</span>
+                                            <span class="like-count">312</span>
+                                        </button>
+                                        <button class="flex items-center space-x-1 hover:text-blue-400 transition comment-toggle">
+                                            <span>💬</span>
+                                            <span>45</span>
+                                        </button>
+                                    </div>
+                                    <button class="hover:text-purple-400 transition">↪️</button>
+                                </div>
+                                <div class="comment-section mt-3">
+                                    <div class="space-y-2 mb-2 max-h-48 overflow-y-auto">
+                                        <div class="flex space-x-2">
+                                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex-shrink-0"></div>
+                                            <div>
+                                                <p class="text-white"><span class="font-bold">Sophie</span> This setup is goals! 🔥</p>
+                                                <p class="text-xs text-gray-400 mt-1">5 hours ago</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex-shrink-0"></div>
+                                            <div>
+                                                <p class="text-white"><span class="font-bold">Alex</span> What keyboard is that?</p>
+                                                <p class="text-xs text-gray-400 mt-1">3 hours ago</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="comment-input">
+                                        <input type="text" placeholder="Add a comment..." class="comment-field">
+                                        <button class="add-comment">➤</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Camera Tab -->
+                <div id="camera-tab" class="hidden p-4">
+                    <div class="camera-screen">
+                        <div class="camera-grid"></div>
+                        <div class="absolute top-8 left-0 right-0 flex justify-between px-6">
+                            <button class="w-10 h-10 rounded-full bg-gray-800/70 flex items-center justify-center text-white text-lg">🔄</button>
+                            <button class="w-10 h-10 rounded-full bg-gray-800/70 flex items-center justify-center text-white text-lg">✨</button>
+                        </div>
+                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full border-4 border-white/20"></div>
+                        <div class="camera-controls">
+                            <button class="camera-btn bg-gray-800/70 text-white text-2xl">📊</button>
+                            <button class="camera-btn bg-red-500 text-white text-3xl">●</button>
+                            <button class="camera-btn bg-gray-800/70 text-white text-2xl">💬</button>
+                        </div>
+                        <div class="absolute bottom-20 flex space-x-6">
+                            <button class="px-4 py-1.5 bg-gray-800/70 rounded-full text-white text-sm">Story</button>
+                            <button class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full text-white text-sm font-medium">Feed</button>
+                            <button class="px-4 py-1.5 bg-gray-800/70 rounded-full text-white text-sm">Friends</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create Post Tab -->
+                <div id="create-tab" class="hidden p-4">
+                    <div class="bg-dark-800 rounded-2xl p-4 mb-4 border border-gray-800">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center text-white font-bold text-lg">FH</div>
+                            <div class="flex-1">
+                                <div class="media-selector">
+                                    <div class="media-option active" data-type="text">Text</div>
+                                    <div class="media-option" data-type="photo">Photo</div>
+                                    <div class="media-option" data-type="video">Video</div>
+                                </div>
+                                <div id="text-post" class="mb-4">
+                                    <textarea id="post-text" placeholder="Share something amazing..." class="w-full bg-transparent text-white text-lg focus:outline-none min-h-[100px] resize-none"></textarea>
+                                </div>
+                                <div id="photo-post" class="hidden">
+                                    <div class="media-preview">
+                                        <div class="text-gray-500">+ Tap to select photo</div>
+                                    </div>
+                                    <input type="file" accept="image/*" class="hidden" id="photo-input">
+                                </div>
+                                <div id="video-post" class="hidden">
+                                    <div class="media-preview">
+                                        <div class="text-gray-500">+ Tap to select video</div>
+                                    </div>
+                                    <input type="file" accept="video/*" class="hidden" id="video-input">
+                                </div>
+                                <div class="border-t border-gray-800 pt-3 flex justify-between items-center">
+                                    <div class="flex space-x-4">
+                                        <button id="add-photo" class="text-purple-400 text-xl">🖼️</button>
+                                        <button id="add-video" class="text-blue-400 text-xl">🎥</button>
+                                        <button class="text-amber-400 text-xl">📍</button>
+                                    </div>
+                                    <button id="publish-post" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full font-medium">Post</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-dark-800 rounded-2xl p-4 border border-gray-800">
+                            <div class="flex items-center justify-between mb-3">
+                                <p class="font-bold text-white">Add to your story</p>
+                                <span class="text-xs text-gray-400">Expires in 24h</span>
+                            </div>
+                            <div class="h-40 bg-gradient-to-br from-purple-900/30 to-blue-900/30 rounded-xl border-2 border-dashed border-gray-700 flex items-center justify-center text-gray-500">
+                                + Tap to add photo/video
+                            </div>
+                        </div>
+                        
+                        <div class="bg-dark-800 rounded-2xl p-4 border border-gray-800">
+                            <p class="font-bold text-white mb-3">Share with friends</p>
+                            <div class="flex space-x-4">
+                                <div class="flex flex-col items-center">
+                                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white font-bold text-xl mb-2">S</div>
+                                    <span class="text-xs text-white">Sarah</span>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-xl mb-2">M</div>
+                                    <span class="text-xs text-white">Mike</span>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white font-bold text-xl mb-2">T</div>
+                                    <span class="text-xs text-white">Tina</span>
+                              
