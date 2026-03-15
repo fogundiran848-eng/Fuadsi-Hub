@@ -1,5 +1,4 @@
-{
-  "name": "fuadsi-hub",
+"name": "fuadsi-hub",
   "version": "1.0.0",
   "description": "FUADSI Hub Social Media Prototype",
   "main": "server.js",
