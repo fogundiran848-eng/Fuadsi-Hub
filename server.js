@@ -16,7 +16,10 @@ mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
 app.post('/api/auth/register', (req, res) => {
     // Registration logic here
 });
-
+"dependencies": {
+  "express": "^4.18.2",
+  "mongoose": "^7.0.0"
+}
 app.post('/api/auth/login', (req, res) => {
     // Login logic here
 });
