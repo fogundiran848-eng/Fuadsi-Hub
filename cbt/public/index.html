@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FUADSI — Examination Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --green-dark:  #1a4d2e;
+  --green-mid:   #2e7d4f;
+  --green-light: #4caf76;
+  --gold:        #f5c518;
+  --gold-light:  #fde97a;
+  --cream:       #fdf8ee;
+  --warm-white:  #fffef9;
+  --text-dark:   #1c2b1e;
+  --text-muted:  #5a6e5c;
+  --border:      rgba(46,125,79,0.18);
+  --danger:      #d32f2f;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background-color: var(--cream); min-height: 100vh; display: flex; overflow-x: hidden; }
+
+/* ── Left Panel ─────────────────────────────────── */
+.left-panel {
+  width: 52%;
+  background: linear-gradient(155deg, var(--green-dark) 0%, #0f3520 40%, #163d27 100%);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 48px;
+  overflow: cover;
+}
+.left-panel::before {
+  content: ''; position: absolute; width: 520px; height: 520px;
+  border-radius: 50%; border: 1.5px solid rgba(245,197,24,0.12);
+  top: -120px; left: -120px;
+}
+.left-panel::after {
+  content: ''; position: absolute; width: 360px; height: 360px;
+  border-radius: 50%; border: 1.5px solid rgba(245,197,24,0.08);
+  bottom: -80px; right: -80px;
+}
+.deco-ring { position: absolute; border-radius: 50%; border: 1px solid rgba(76,175,118,0.15); }
+.deco-ring-1 { width: 700px; height: 700px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+.deco-ring-2 { width: 500px; height: 500px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+.panel-content { position: relative; z-index: 2; text-align: center; max-width: 420px; }
+
+.logo-wrap {
+  width: 148px; height: 148px;
+  border-radius: 50%;
+  background: white;
+  margin: 0 auto 32px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.35), 0 0 0 6px rgba(245,197,24,0.2);
+  animation: logoIn 0.8s cubic-bezier(.16,1,.3,1) both;
+  overflow: hidden;
+  padding: 8px;
+}
+.logo-wrap img { 
+  width: 100%; 
+  height: 100%; 
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+@keyframes logoIn { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
+.uni-name { font-family: 'Lora', serif; font-size: 22px; font-weight: 700; color: var(--gold); line-height: 1.3; letter-spacing: 0.01em; margin-bottom: 8px; animation: fadeUp 0.7s 0.2s both; }
+.uni-location { font-size: 13px; color: rgba(255,255,255,0.55); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 32px; animation: fadeUp 0.7s 0.3s both; }
+.divider { width: 60px; height: 2px; background: linear-gradient(to right, transparent, var(--gold), transparent); margin: 0 auto 28px; animation: fadeUp 0.7s 0.35s both; }
+.portal-label { font-size: 13px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 10px; animation: fadeUp 0.7s 0.4s both; }
+.portal-title { font-family: 'Lora', serif; font-size: 36px; font-weight: 700; color: white; line-height: 1.1; animation: fadeUp 0.7s 0.45s both; }
+.portal-title span { color: var(--gold); }
+.tagline { margin-top: 20px; font-size: 13.5px; color: rgba(255,255,255,0.45); line-height: 1.6; animation: fadeUp 0.7s 0.55s both; }
+.motto-strip { margin-top: 40px; display: flex; gap: 10px; justify-content: center; animation: fadeUp 0.7s 0.65s both; }
+.motto-pill { padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(245,197,24,0.3); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.6); }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Right Panel ─────────────────────────────────── */
+.right-panel { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 48px 40px; background: var(--warm-white); position: relative; }
+.right-panel::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle at 80% 20%, rgba(76,175,118,0.06) 0%, transparent 50%), radial-gradient(circle at 20% 80%, rgba(245,197,24,0.05) 0%, transparent 50%); pointer-events: none; }
+.form-card { width: 100%; max-width: 380px; position: relative; z-index: 1; animation: fadeUp 0.7s 0.3s both; }
+.welcome-line { font-size: 13px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-mid); margin-bottom: 10px; }
+.form-heading { font-family: 'Lora', serif; font-size: 30px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; line-height: 1.2; }
+.form-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 36px; line-height: 1.5; }
+.session-badge { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(to right, #e8f5ee, #f0faf4); border: 1px solid rgba(46,125,79,0.2); border-radius: 10px; padding: 10px 16px; margin-bottom: 32px; width: 100%; }
+.session-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-mid); box-shadow: 0 0 0 3px rgba(46,125,79,0.2); animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(46,125,79,0.2); } 50% { box-shadow: 0 0 0 6px rgba(46,125,79,0.08); } }
+.session-text { font-size: 12.5px; color: var(--green-dark); font-weight: 500; }
+.session-text span { color: var(--text-muted); font-weight: 400; margin-left: 4px; }
+.field-group { margin-bottom: 20px; }
+.field-label { display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dark); margin-bottom: 8px; }
+.field-wrap { position: relative; }
+.field-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; opacity: 0.5; pointer-events: none; }
+.field-input { width: 100%; padding: 14px 14px 14px 42px; border-radius: 12px; border: 1.5px solid var(--border); background: #f7faf8; font-family: 'DM Sans', sans-serif; font-size: 14.5px; color: var(--text-dark); transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; outline: none; }
+.field-input::placeholder { color: #a0b0a4; }
+.field-input:focus { border-color: var(--green-mid); background: white; box-shadow: 0 0 0 4px rgba(46,125,79,0.1); }
+.toggle-pw { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; opacity: 0.45; transition: opacity 0.2s; padding: 0; }
+.toggle-pw:hover { opacity: 0.75; }
+.forgot-row { display: flex; justify-content: flex-end; margin-top: -8px; margin-bottom: 24px; }
+.forgot-link { font-size: 12.5px; color: var(--green-mid); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+.forgot-link:hover { color: var(--green-dark); text-decoration: underline; }
+.btn-login { width: 100%; padding: 15px; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--green-mid) 0%, var(--green-dark) 100%); color: white; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; letter-spacing: 0.03em; transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(30,77,46,0.3); }
+.btn-login:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(30,77,46,0.38); }
+.btn-login:active { transform: translateY(0); box-shadow: 0 2px 12px rgba(30,77,46,0.25); }
+.btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.btn-login.loading .btn-text { opacity: 0; }
+.btn-login.loading .btn-spinner { display: block; }
+.btn-spinner { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; border: 2.5px solid rgba(255,255,255,0.35); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.error-msg { display: none; margin-top: 14px; padding: 11px 14px; border-radius: 10px; background: #fff0f0; border: 1px solid #fcc; font-size: 13px; color: #b02020; text-align: center; }
+.error-msg.show { display: block; }
+.form-footer { margin-top: 28px; text-align: center; font-size: 12px; color: #b0bdb2; line-height: 1.6; }
+.form-footer a { color: var(--green-mid); text-decoration: none; }
+
+/* ── Dashboard ────────────────────────────────── */
+#dashboard, #exam-screen, #result-screen { display: none; width: 100%; height: 100vh; background: var(--cream); overflow-y: auto; }
+.dash-header { background: linear-gradient(to right, var(--green-dark), #1c5c35); padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 16px rgba(0,0,0,0.2); }
+.dash-logo { display: flex; align-items: center; gap: 12px; }
+.dash-logo img { 
+  width: 40px; 
+  height: 40px; 
+  object-fit: contain;
+  border-radius: 50%;
+  background: white;
+  padding: 2px;
+}
+.dash-logo-text { font-family: 'Lora', serif; font-size: 16px; font-weight: 700; color: white; }
+.dash-logo-text span { color: var(--gold); }
+.dash-user { display: flex; align-items: center; gap: 10px; }
+.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), #c8a010); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: var(--green-dark); }
+.user-name { font-size: 13px; color: rgba(255,255,255,0.85); }
+.user-matric { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 1px; }
+.user-dept { font-size: 10px; color: rgba(245,197,24,0.7); margin-top: 1px; }
+.btn-logout { margin-left: 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 7px 14px; font-size: 12.5px; color: white; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
+.btn-logout:hover { background: rgba(255,255,255,0.18); }
+.dash-body { max-width: 900px; margin: 0 auto; padding: 36px 24px; }
+.dash-greeting { font-family: 'Lora', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 4px; }
+.dash-greeting span { color: var(--green-mid); }
+.dash-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; }
+.dash-dept { font-size: 13px; color: var(--green-mid); font-weight: 600; margin-bottom: 32px; padding: 8px 16px; background: #e8f5ee; border-radius: 8px; display: inline-block; }
+.exams-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px; }
+.exams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.exam-card { background: white; border-radius: 16px; padding: 22px; border: 1.5px solid rgba(46,125,79,0.1); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; position: relative; overflow: hidden; }
+.exam-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(30,77,46,0.12); }
+.exam-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+.exam-card.active::before  { background: linear-gradient(to right, var(--green-mid), var(--green-light)); }
+.exam-card.pending::before { background: linear-gradient(to right, var(--gold), #e6b800); }
+.exam-card.done::before    { background: #ddd; }
+.exam-tag { display: inline-block; font-size: 10.5px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-bottom: 12px; }
+.tag-active  { background: #e8f5ee; color: var(--green-dark); }
+.tag-pending { background: #fef9e0; color: #8a6d00; }
+.tag-done    { background: #f0f0f0; color: #888; }
+.exam-title { font-family: 'Lora', serif; font-size: 16px; font-weight: 600; color: var(--text-dark); margin-bottom: 4px; }
+.exam-code { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+.exam-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); }
+.exam-meta-item { display: flex; align-items: center; gap: 5px; }
+.btn-start { margin-top: 16px; width: 100%; padding: 11px; border-radius: 10px; border: none; background: linear-gradient(to right, var(--green-mid), var(--green-dark)); color: white; font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+.btn-start:hover { opacity: 0.88; }
+.btn-start.disabled { background: #e0e0e0; color: #aaa; cursor: not-allowed; }
+
+/* ── Exam Slide Interface ───────────────────────── */
+.exam-header { background: var(--green-dark); padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.exam-info h2 { font-size: 16px; font-weight: 600; }
+.exam-info p { font-size: 12px; opacity: 0.8; }
+.timer-box { background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 6px; font-family: monospace; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.timer-box.warning { color: #ff6b6b; background: rgba(255, 107, 107, 0.1); }
+.btn-submit-top { background: var(--gold); color: var(--green-dark); border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: transform 0.1s; }
+.btn-submit-top:hover { transform: scale(1.05); }
+
+.exam-container { max-width: 700px; margin: 40px auto 0; padding: 0 24px; }
+.progress-bar-container { background: rgba(46,125,79,0.1); height: 6px; border-radius: 10px; margin-bottom: 24px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--green-mid); width: 2.5%; transition: width 0.3s ease; border-radius: 10px; }
+
+.question-slide { display: none; animation: fadeIn 0.3s ease; }
+.question-slide.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.question-card { background: white; padding: 28px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 32px; }
+.q-number { font-size: 13px; font-weight: 700; color: var(--green-mid); text-transform: uppercase; margin-bottom: 10px; display: flex; justify-content: space-between; }
+.q-number span { background: #e8f5ee; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+.q-text { font-size: 19px; font-weight: 500; color: var(--text-dark); margin-bottom: 24px; line-height: 1.5; }
+.options-grid { display: flex; flex-direction: column; gap: 12px; }
+.option-label { display: flex; align-items: center; padding: 14px 18px; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.15s; font-size: 15px; }
+.option-label:hover { background: #f8faf9; border-color: var(--green-light); }
+.option-label input { margin-right: 14px; accent-color: var(--green-mid); transform: scale(1.3); }
+.option-label.selected { border-color: var(--green-mid); background: #e8f5ee; font-weight: 500; }
+
+.nav-buttons { display: flex; justify-content: space-between; margin-bottom: 40px; }
+.btn-nav { padding: 12px 24px; border-radius: 8px; border: 2px solid var(--border); background: white; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+.btn-nav:hover:not(:disabled) { background: var(--green-mid); color: white; border-color: var(--green-mid); }
+.btn-nav:disabled { opacity: 0.5; cursor: not-allowed; background: #f0f0f0; }
+.btn-nav.next { background: var(--green-mid); color: white; border-color: var(--green-mid); }
+.btn-nav.next:hover { background: var(--green-dark); border-color: var(--green-dark); }
+
+/* ── Result Screen ───────────────────────── */
+.result-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; padding: 24px; }
+.score-circle { width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(var(--green-mid) 0%, #eee 0%); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; position: relative; transition: background 1s ease; }
+.score-inner { width: 130px; height: 130px; background: white; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.score-val { font-size: 38px; font-weight: 700; color: var(--green-dark); }
+.score-total { font-size: 14px; color: var(--text-muted); }
+.result-grade { font-size: 20px; font-weight: 700; color: var(--green-mid); margin-bottom: 8px; }
+.result-msg { font-size: 18px; color: var(--text-dark); margin-bottom: 32px; }
+.result-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.btn-home { padding: 12px 24px; background: var(--green-dark); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.15s; }
+.btn-home:hover { transform: translateY(-2px); }
+.btn-pdf { padding: 12px 24px; background: var(--gold); color: var(--green-dark); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.15s; }
+.btn-pdf:hover { transform: translateY(-2px); }
+
+/* Anti-cheat warning */
+.cheat-warning { position: fixed; top: 0; left: 0; right: 0; background: var(--danger); color: white; padding: 12px; text-align: center; font-weight: 600; z-index: 9999; display: none; animation: fadeIn 0.3s; }
+.cheat-warning.show { display: block; }
+
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  .left-panel { width: 100%; padding: 32px 24px 24px; min-height: auto; }
+  .logo-wrap { width: 100px; height: 100px; }
+  .logo-wrap img { width: 90px; height: 90px; }
+  .uni-name { font-size: 17px; }
+  .portal-title { font-size: 26px; }
+  .right-panel { padding: 32px 24px; }
+  .question-card { padding: 20px; }
+  .q-text { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── ANTI-CHEAT WARNING ────────────────────────── -->
+<div class="cheat-warning" id="cheat-warning"></div>
+
+<!-- ── LOGIN SCREEN ──────────────────────────────────── -->
+<div id="login-screen" style="display:contents">
+<div class="left-panel">
+<div class="deco-ring deco-ring-1"></div>
+<div class="deco-ring deco-ring-2"></div>
+<div class="panel-content">
+<div class="logo-wrap">
+<img src="im.jpg" alt="FUADSI Logo" onerror="this.style.display='none'" />
+</div>
+<div class="uni-name">Federal University of Agriculture<br>and Development Studies</div>
+<div class="uni-location">Iragbiji, Osun State, Nigeria</div>
+<div class="divider"></div>
+<div class="portal-label">Student Portal</div>
+<div class="portal-title">Examination<br><span>Access</span> Centre</div>
+<p class="tagline">Secure, timed, and monitored computer-based<br>testing for FUADSI students.</p>
+<div class="motto-strip">
+<div class="motto-pill">Innovate</div>
+<div class="motto-pill">Educate</div>
+<div class="motto-pill">Transform</div>
+</div>
+</div>
+</div>
+<div class="right-panel">
+<div class="form-card">
+<div class="welcome-line">Student Login</div>
+<h1 class="form-heading">Sign in to<br>your exam</h1>
+<p class="form-sub">Enter your credentials to access scheduled examinations.</p>
+<div class="session-badge">
+<div class="session-dot"></div>
+<div class="session-text">Examination Session Active <span>2025/2026 First Semester</span></div>
+</div>
+<div class="field-group">
+<label class="field-label" for="matric">Matriculation Number</label>
+<div class="field-wrap">
+<span class="field-icon">&#127891;</span>
+<input class="field-input" type="text" id="matric" placeholder="e.g. 2500101" autocomplete="off" spellcheck="false" />
+</div>
+</div>
+<div class="field-group">
+<label class="field-label" for="password">Password</label>
+<div class="field-wrap">
+<span class="field-icon">&#128274;</span>
+<input class="field-input" type="password" id="password" placeholder="Enter your password" autocomplete="current-password" />
+<button class="toggle-pw" id="toggle-pw" type="button">&#128065;</button>
+</div>
+</div>
+<button class="btn-login" id="login-btn" type="button">
+<span class="btn-text">Access Examination Portal</span>
+<div class="btn-spinner"></div>
+</button>
+<div class="error-msg" id="error-msg">Invalid matric number or password. Please try again.</div>
+<div class="form-footer">Having trouble? Contact the <a href="#">ICT Support Desk</a></div>
+</div>
+</div>
+</div>
+
+<!-- ── DASHBOARD SCREEN ──────────────────────────────── -->
+<div id="dashboard">
+<div class="dash-header">
+<div class="dash-logo">
+<img src="fuadsi-logo.png" alt="FUADSI" onerror="this.style.display='none'" />
+<div class="dash-logo-text">FUADSI <span>Exam Portal</span></div>
+</div>
+<div class="dash-user">
+<div class="user-avatar" id="user-avatar">A</div>
+<div>
+  <div class="user-name" id="user-name-display">Student</div>
+  <div class="user-matric" id="user-matric-display">FUADSI/---</div>
+  <div class="user-dept" id="user-dept-display"></div>
+</div>
+<button class="btn-logout" id="logout-btn">Log out</button>
+</div>
+</div>
+<div class="dash-body">
+<div class="dash-greeting">Good day, <span id="dash-first-name">Student</span></div>
+<p class="dash-sub">Here are your scheduled examinations for this semester.</p>
+<div class="dash-dept" id="dash-dept-badge"></div>
+<div class="exams-label">Your Examinations</div>
+<div class="exams-grid" id="exams-grid">
+  <!-- Exam cards will be generated dynamically -->
+</div>
+</div>
+</div>
+
+<!-- ── EXAM SCREEN ───────────────────────────────────── -->
+<div id="exam-screen">
+    <div class="exam-header">
+        <div class="exam-info">
+            <h2 id="exam-title-display">ECO 101</h2>
+            <p id="q-progress-text">Question 1 of 40</p>
+        </div>
+        <div class="timer-box" id="timer-box"><span>&#9201;</span> <span id="time-left">30:00</span></div>
+        <button class="btn-submit-top" onclick="submitExam()">Submit Exam</button>
+    </div>
+    <div class="exam-container">
+        <div class="progress-bar-container"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="questions-wrapper"></div>
+        <div class="nav-buttons">
+            <button class="btn-nav prev" id="btn-prev" onclick="changeSlide(-1)">&#8592; Previous</button>
+            <button class="btn-nav next" id="btn-next" onclick="changeSlide(1)">Next &#8594;</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── RESULT SCREEN ─────────────────────────────────── -->
+<div id="result-screen">
+    <div class="result-container">
+        <div class="score-circle" id="score-circle">
+            <div class="score-inner">
+                <div class="score-val" id="final-score">0</div>
+                <div class="score-total">/ 100</div>
+            </div>
+        </div>
+        <div class="result-grade" id="result-grade"></div>
+        <h2 style="font-family:'Lora',serif; margin-bottom:8px;">Examination Completed</h2>
+        <p class="result-msg" id="result-message">Your results have been recorded successfully.</p>
+        <div class="result-actions">
+            <button class="btn-home" onclick="returnToDashboard()">Return to Dashboard</button>
+            <button class="btn-pdf" id="btn-download-pdf" onclick="downloadPDF()" style="display:none">Download Result Slip (PDF)</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── API & STATE ──────────────────────────────────────
+const API = '';
+let authToken = localStorage.getItem('cbtToken') || '';
+let currentUser = null;
+let currentExam = [];
+let userAnswers = {};
+let currentSlide = 0;
+let timerInterval;
+let timeRemaining = 30 * 60;
+let currentCourseId = null;
+let currentSessionId = null;
+let tabSwitchCount = 0;
+let saveInterval = null;
+
+// ── HELPERS ──────────────────────────────────────────
+async function apiFetch(url, opts = {}) {
+  opts.headers = { ...opts.headers, 'Content-Type': 'application/json' };
+  if (authToken) opts.headers['Authorization'] = `Bearer ${authToken}`;
+  const res = await fetch(`${API}${url}`, opts);
+  if (res.status === 401) { handleLogout(); throw new Error('Session expired'); }
+  const contentType = res.headers.get('content-type');
+  if (contentType && contentType.includes('application/pdf')) return res;
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+// ── LOGIN ────────────────────────────────────────────
+const pwInput = document.getElementById('password');
+const toggleBtn = document.getElementById('toggle-pw');
+
+toggleBtn?.addEventListener('click', () => {
+  pwInput.type = pwInput.type === 'password' ? 'text' : 'password';
+  toggleBtn.innerHTML = pwInput.type === 'password' ? '&#128065;' : '&#128584;';
+});
+
+document.getElementById('login-btn')?.addEventListener('click', handleLogin);
+document.getElementById('logout-btn')?.addEventListener('click', handleLogout);
+document.addEventListener('keydown', e => { if(e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') document.getElementById('login-btn')?.click(); });
+
+async function handleLogin() {
+  const m = document.getElementById('matric')?.value.trim();
+  const p = document.getElementById('password')?.value.trim();
+  const error = document.getElementById('error-msg');
+  const btn = document.getElementById('login-btn');
+  
+  if(!m || !p) {
+    error.textContent = 'Please enter both matric number and password.';
+    error.classList.add('show');
+    return;
+  }
+  error.classList.remove('show');
+  btn?.classList.add('loading');
+  btn.disabled = true;
+  
+  try {
+    const data = await apiFetch('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ matric: m, password: p })
+    });
+    
+    if (data.user.role === 'admin') {
+      throw new Error('Please use the admin portal at /admin');
+    }
+    
+    authToken = data.token;
+    currentUser = data.user;
+    localStorage.setItem('cbtToken', authToken);
+    
+    showDashboard();
+  } catch (err) {
+    error.textContent = err.message;
+    error.classList.add('show');
+  } finally {
+    btn?.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+
+function handleLogout() {
+  clearInterval(timerInterval);
+  clearInterval(saveInterval);
+  authToken = '';
+  currentUser = null;
+  localStorage.removeItem('cbtToken');
+  
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'contents';
+  document.getElementById('matric').value = '';
+  document.getElementById('password').value = '';
+  resetExam();
+}
+
+// ── DASHBOARD ────────────────────────────────────────
+function showDashboard() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  
+  const firstName = currentUser.name.split(' ')[0];
+  document.getElementById('user-avatar').textContent = currentUser.name.charAt(0).toUpperCase();
+  document.getElementById('user-name-display').textContent = currentUser.name;
+  document.getElementById('user-matric-display').textContent = currentUser.matric;
+  document.getElementById('user-dept-display').textContent = currentUser.department;
+  document.getElementById('dash-first-name').textContent = firstName;
+  document.getElementById('dash-dept-badge').textContent = `Department: ${currentUser.department} | Level: ${currentUser.level || 'N/A'}`;
+  
+  renderDashboard();
+}
+
+async function renderDashboard() {
+  const grid = document.getElementById('exams-grid');
+  if(!grid) return;
+  grid.innerHTML = '<p style="color:var(--text-muted)">Loading examinations...</p>';
+  
+  try {
+    const courses = await apiFetch('/api/courses');
+    grid.innerHTML = '';
+    
+    if (courses.length === 0) {
+      grid.innerHTML = '<p style="color:var(--text-muted)">No examinations available for your department.</p>';
+      return;
+    }
+    
+    courses.forEach(course => {
+      const card = document.createElement('div');
+      const status = course.examStatus || course.status;
+      card.className = `exam-card ${status}`;
+      
+      let tagClass, tagText, btnText, btnDisabled;
+      if (status === 'done') {
+        tagClass = 'tag-done'; tagText = '&#10003; Submitted';
+        btnText = 'View Results'; btnDisabled = false;
+      } else if (status === 'active') {
+        tagClass = 'tag-active'; tagText = '&#9679; Available Now';
+        btnText = 'Start Examination &#8594;'; btnDisabled = false;
+      } else {
+        tagClass = 'tag-pending'; tagText = '&#9203; Upcoming';
+        btnText = 'Not Yet Available'; btnDisabled = true;
+      }
+      
+      let metaHtml = status === 'done'
+        ? `<div class="exam-meta-item">Score: ${course.score || 0}% | Grade: ${course.grade || 'N/A'}</div>`
+        : `<div class="exam-meta-item">&#9201; ${course.duration} mins</div><div class="exam-meta-item">&#128221; ${course.totalQuestions} questions</div>`;
+      
+      card.innerHTML = `
+        <div class="exam-tag ${tagClass}">${tagText}</div>
+        <div class="exam-title">${course.title}</div>
+        <div class="exam-code">${course.code} — ${course.units} Units</div>
+        <div class="exam-meta">${metaHtml}</div>
+        <button class="btn-start ${btnDisabled ? 'disabled' : ''}" ${btnDisabled ? 'disabled' : ''} 
+          onclick="${status === 'done' ? `viewResult('${course.courseId}')` : `startExam('${course.courseId}')`}">${btnText}</button>
+      `;
+      grid.appendChild(card);
+    });
+  } catch (err) {
+    grid.innerHTML = `<p style="color:var(--danger)">${err.message}</p>`;
+  }
+}
+
+// ── EXAM LOGIC ───────────────────────────────────────
+async function startExam(courseId) {
+  try {
+    const data = await apiFetch('/api/exam/start', {
+      method: 'POST',
+      body: JSON.stringify({ courseId })
+    });
+    
+    currentCourseId = courseId;
+    currentSessionId = data.sessionId;
+    currentExam = data.questions;
+    timeRemaining = data.timeRemaining;
+    tabSwitchCount = 0;
+    
+    // Restore saved answers if resuming
+    userAnswers = {};
+    if (data.savedAnswers && Object.keys(data.savedAnswers).length > 0) {
+      userAnswers = data.savedAnswers;
+    }
+    currentSlide = 0;
+    
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('exam-screen').style.display = 'block';
+    document.getElementById('exam-title-display').textContent = data.course.code.toUpperCase();
+    
+    const wrapper = document.getElementById('questions-wrapper');
+    wrapper.innerHTML = '';
+    
+    currentExam.forEach((item, index) => {
+      const qId = item._id;
+      let optionsHtml = '';
+      item.options.forEach((opt, optIndex) => {
+        const isSelected = userAnswers[qId] === optIndex;
+        optionsHtml += `<label class="option-label ${isSelected ? 'selected' : ''}" onclick="selectOption('${qId}', ${index}, ${optIndex})">
+          <input type="radio" name="q${index}" value="${optIndex}" ${isSelected ? 'checked' : ''}>
+          <span>${opt}</span>
+        </label>`;
+      });
+      wrapper.innerHTML += `
+        <div class="question-slide" id="slide-${index}">
+          <div class="question-card">
+            <div class="q-number">Question ${index + 1} of ${currentExam.length} <span>${index === 0 ? 'New' : ''}</span></div>
+            <div class="q-text">${item.q}</div>
+            <div class="options-grid">${optionsHtml}</div>
+          </div>
+        </div>`;
+    });
+    
+    updateSlide();
+    updateTimerDisplay();
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeRemaining--;
+      updateTimerDisplay();
+      if(timeRemaining <= 0) submitExam(true);
+    }, 1000);
+    
+    // Auto-save every 30 seconds
+    clearInterval(saveInterval);
+    saveInterval = setInterval(saveProgress, 30000);
+    
+    // Start anti-cheat monitoring
+    startAntiCheat();
+    
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+function updateSlide() {
+  document.querySelectorAll('.question-slide').forEach((el, i) => 
+    el.classList.toggle('active', i === currentSlide));
+  
+  document.getElementById('q-progress-text').textContent = `Question ${currentSlide + 1} of ${currentExam.length}`;
+  document.getElementById('progress-fill').style.width = `${((currentSlide + 1) / currentExam.length) * 100}%`;
+  document.getElementById('btn-prev').disabled = currentSlide === 0;
+  document.getElementById('btn-next').textContent = currentSlide === currentExam.length - 1 ? 'Review & Finish' : 'Next \u2192';
+}
+
+function changeSlide(dir) {
+  currentSlide += dir;
+  if(currentSlide < 0) currentSlide = 0;
+  if(currentSlide > currentExam.length - 1) currentSlide = currentExam.length - 1;
+  updateSlide();
+}
+
+function selectOption(qId, qIndex, optIndex) {
+  userAnswers[qId] = optIndex;
+  const labels = document.querySelectorAll(`#slide-${qIndex} .option-label`);
+  labels.forEach(lbl => lbl.classList.remove('selected'));
+  labels[optIndex].classList.add('selected');
+  labels[optIndex].querySelector('input').checked = true;
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timeRemaining / 60);
+  const s = timeRemaining % 60;
+  document.getElementById('time-left').textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+  document.getElementById('timer-box').classList.toggle('warning', timeRemaining < 300);
+}
+
+async function saveProgress() {
+  if (!currentSessionId) return;
+  try {
+    await apiFetch('/api/exam/save-progress', {
+      method: 'POST',
+      body: JSON.stringify({
+        sessionId: currentSessionId,
+        answers: userAnswers,
+        tabSwitchCount
+      })
+    });
+  } catch (e) { /* silent fail */ }
+}
+
+async function submitExam(isTimeout = false) {
+  if(!isTimeout && timeRemaining > 60 && !confirm("Are you sure you want to submit your exam now?")) return;
+  
+  clearInterval(timerInterval);
+  clearInterval(saveInterval);
+  stopAntiCheat();
+  
+  try {
+    const data = await apiFetch('/api/exam/submit', {
+      method: 'POST',
+      body: JSON.stringify({
+        sessionId: currentSessionId,
+        answers: userAnswers,
+        tabSwitchCount
+      })
+    });
+    
+    document.getElementById('exam-screen').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+    document.getElementById('final-score').textContent = data.percentage;
+    document.getElementById('result-grade').textContent = `Grade: ${data.grade}`;
+    document.getElementById('score-circle').style.background = `conic-gradient(var(--green-mid) ${data.percentage}%, #eee ${data.percentage}%)`;
+    document.getElementById('result-message').textContent = data.message;
+    document.getElementById('btn-download-pdf').style.display = 'inline-block';
+    document.getElementById('btn-download-pdf').setAttribute('data-courseid', currentCourseId);
+    
+  } catch (err) {
+    alert('Submission error: ' + err.message);
+    // Still show result screen
+    document.getElementById('exam-screen').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+  }
+}
+
+async function viewResult(courseId) {
+  try {
+    const result = await apiFetch(`/api/results/${courseId}`);
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+    document.getElementById('final-score').textContent = result.percentage;
+    document.getElementById('result-grade').textContent = `Grade: ${result.grade}`;
+    document.getElementById('score-circle').style.background = `conic-gradient(var(--green-mid) ${result.percentage}%, #eee ${result.percentage}%)`;
+    
+    const msg = result.percentage >= 70 ? "Excellent work!" : result.percentage >= 50 ? "Good effort! Keep studying." : "Keep practicing, you will improve!";
+    document.getElementById('result-message').textContent = msg;
+    document.getElementById('btn-download-pdf').style.display = 'inline-block';
+    document.getElementById('btn-download-pdf').setAttribute('data-courseid', courseId);
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+async function downloadPDF() {
+  const courseId = document.getElementById('btn-download-pdf').getAttribute('data-courseid');
+  try {
+    const res = await fetch(`${API}/api/results/${courseId}/pdf`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    if (!res.ok) throw new Error('Failed to generate PDF');
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Result_${currentUser.matric}_${courseId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    alert('PDF download failed: ' + err.message);
+  }
+}
+
+function returnToDashboard() {
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  renderDashboard();
+}
+
+function resetExam() {
+  currentSlide = 0;
+  userAnswers = {};
+  currentCourseId = null;
+  currentSessionId = null;
+  tabSwitchCount = 0;
+  document.getElementById('questions-wrapper').innerHTML = '';
+}
+
+// ── ANTI-CHEAT SYSTEM ────────────────────────────────
+let antiCheatActive = false;
+
+function startAntiCheat() {
+  antiCheatActive = true;
+  
+  // Detect tab switching
+  document.addEventListener('visibilitychange', onVisibilityChange);
+  
+  // Disable right-click
+  document.addEventListener('contextmenu', preventAction);
+  
+  // Disable copy/paste
+  document.addEventListener('copy', preventAction);
+  document.addEventListener('paste', preventAction);
+  document.addEventListener('cut', preventAction);
+  
+  // Detect key combos
+  document.addEventListener('keydown', onKeyDown);
+}
+
+function stopAntiCheat() {
+  antiCheatActive = false;
+  document.removeEventListener('visibilitychange', onVisibilityChange);
+  document.removeEventListener('contextmenu', preventAction);
+  document.removeEventListener('copy', preventAction);
+  document.removeEventListener('paste', preventAction);
+  document.removeEventListener('cut', preventAction);
+  document.removeEventListener('keydown', onKeyDown);
+  hideCheatWarning();
+}
+
+function onVisibilityChange() {
+  if (!antiCheatActive) return;
+  if (document.hidden) {
+    tabSwitchCount++;
+    logSuspiciousActivity('tab_switch', `Tab switch #${tabSwitchCount}`);
+    
+    if (tabSwitchCount >= 3) {
+      showCheatWarning(`WARNING: You have switched tabs ${tabSwitchCount} times. Your exam will be auto-submitted after 5 tab switches.`);
+    }
+    if (tabSwitchCount >= 5) {
+      showCheatWarning('EXAM AUTO-SUBMITTED due to excessive tab switching.');
+      submitExam(true);
+    }
+  }
+}
+
+function preventAction(e) {
+  if (!antiCheatActive) return;
+  e.preventDefault();
+  showCheatWarning('This action is disabled during the exam.');
+  logSuspiciousActivity('blocked_action', e.type);
+  setTimeout(hideCheatWarning, 3000);
+}
+
+function onKeyDown(e) {
+  if (!antiCheatActive) return;
+  // Block Ctrl+C, Ctrl+V, Ctrl+U, F12
+  if ((e.ctrlKey && ['c','v','u','a'].includes(e.key.toLowerCase())) || e.key === 'F12') {
+    e.preventDefault();
+    showCheatWarning('This keyboard shortcut is disabled during the exam.');
+    logSuspiciousActivity('blocked_key', `${e.ctrlKey?'Ctrl+':''}${e.key}`);
+    setTimeout(hideCheatWarning, 3000);
+  }
+}
+
+function showCheatWarning(msg) {
+  const el = document.getElementById('cheat-warning');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideCheatWarning() {
+  document.getElementById('cheat-warning').classList.remove('show');
+}
+
+async function logSuspiciousActivity(type, details) {
+  if (!currentSessionId) return;
+  try {
+    await apiFetch('/api/exam/log-activity', {
+      method: 'POST',
+      body: JSON.stringify({
+        sessionId: currentSessionId,
+        activityType: type,
+        details
+      })
+    });
+  } catch (e) { /* silent */ }
+}
+
+// ── AUTO-LOGIN CHECK ─────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  if (authToken) {
+    try {
+      const data = await apiFetch('/api/auth/me');
+      if (data.user && data.user.role === 'student') {
+        currentUser = data.user;
+        showDashboard();
+      } else {
+        handleLogout();
+      }
+    } catch {
+      handleLogout();
+    }
+  }
+});
+</script>
+</body>
+</html>
