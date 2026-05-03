@@ -20,9 +20,10 @@ router.get('/students', async (req, res) => {
     const filter = { role: 'student' };
     if (req.query.department) filter.department = req.query.department;
     if (req.query.search) {
+      const escaped = req.query.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       filter.$or = [
-        { name: { $regex: req.query.search, $options: 'i' } },
-        { matric: { $regex: req.query.search, $options: 'i' } }
+        { name: { $regex: escaped, $options: 'i' } },
+        { matric: { $regex: escaped, $options: 'i' } }
       ];
     }
     const students = await User.find(filter).select('-password').sort({ matric: 1 });

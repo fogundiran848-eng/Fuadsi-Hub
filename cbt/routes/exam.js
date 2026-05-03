@@ -69,11 +69,52 @@ router.post('/start', auth, [
       const remaining = Math.max(0, course.duration * 60 - elapsed);
 
       if (remaining <= 0) {
-        // Auto-submit expired session
+        // Auto-submit expired session and score saved answers
         activeSession.submitted = true;
         activeSession.submittedAt = now;
         await activeSession.save();
-        return res.status(400).json({ error: 'Your exam session has expired.' });
+
+        // Score any saved answers
+        const questionsWithAnswers = await Question.find({
+          _id: { $in: activeSession.questionOrder }
+        });
+        const savedAnswers = Object.fromEntries(activeSession.answers || new Map());
+        let correctCount = 0;
+        questionsWithAnswers.forEach(q => {
+          const qId = q._id.toString();
+          if (savedAnswers[qId] !== undefined && savedAnswers[qId] === q.a) {
+            correctCount++;
+          }
+        });
+        const pct = questionsWithAnswers.length > 0
+          ? Math.round((correctCount / questionsWithAnswers.length) * 100) : 0;
+        const grd = calculateGrade(pct);
+
+        // Remove old result if retake
+        if (course.allowRetake) {
+          await Result.deleteMany({ studentId: req.user._id, courseId: upperCourseId });
+        }
+        const existingExpiredResult = await Result.findOne({
+          studentId: req.user._id, courseId: upperCourseId
+        });
+        if (!existingExpiredResult) {
+          await new Result({
+            studentId: req.user._id,
+            courseId: upperCourseId,
+            sessionId: activeSession._id,
+            totalQuestions: questionsWithAnswers.length,
+            correctAnswers: correctCount,
+            score: correctCount,
+            percentage: pct,
+            grade: grd,
+            tabSwitchCount: activeSession.tabSwitchCount || 0
+          }).save();
+        }
+
+        return res.status(400).json({
+          error: 'Your exam session has expired. Your saved answers have been scored.',
+          scored: true, percentage: pct, grade: grd
+        });
       }
 
       return res.json({

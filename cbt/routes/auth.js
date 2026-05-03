@@ -51,7 +51,7 @@ router.post('/login', [
   }
 });
 
-// POST /api/auth/register (admin creates students, or initial admin setup)
+// POST /api/auth/register (admin-only, or initial admin setup with setup key)
 router.post('/register', [
   body('matric').trim().notEmpty().withMessage('Matric number is required'),
   body('name').trim().notEmpty().withMessage('Name is required'),
@@ -67,10 +67,26 @@ router.post('/register', [
 
     const { matric, name, department, password, level, role, adminSetupKey } = req.body;
 
-    // Allow admin registration only with setup key
+    // Admin registration requires setup key
     if (role === 'admin') {
       if (adminSetupKey !== process.env.ADMIN_SETUP_KEY) {
         return res.status(403).json({ error: 'Invalid admin setup key.' });
+      }
+    } else {
+      // Student registration requires authenticated admin
+      const header = req.headers.authorization;
+      if (!header || !header.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Student registration requires admin authentication.' });
+      }
+      try {
+        const token = header.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const admin = await User.findById(decoded.id);
+        if (!admin || admin.role !== 'admin') {
+          return res.status(403).json({ error: 'Only admins can register students.' });
+        }
+      } catch {
+        return res.status(401).json({ error: 'Invalid or expired token.' });
       }
     }
 
