@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FUADSI CBT — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --green-dark: #1a4d2e; --green-mid: #2e7d4f; --green-light: #4caf76;
+  --gold: #f5c518; --gold-light: #fde97a; --cream: #fdf8ee; --warm-white: #fffef9;
+  --text-dark: #1c2b1e; --text-muted: #5a6e5c; --border: rgba(46,125,79,0.18);
+  --danger: #d32f2f;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height: 100vh; }
+
+/* Login */
+#admin-login { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 24px; }
+.login-card { background: white; border-radius: 16px; padding: 40px; max-width: 400px; width: 100%; box-shadow: 0 4px 30px rgba(0,0,0,0.1); }
+.login-card h1 { font-family: 'Lora', serif; color: var(--green-dark); margin-bottom: 8px; }
+.login-card p { color: var(--text-muted); margin-bottom: 24px; font-size: 14px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dark); margin-bottom: 6px; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(46,125,79,0.1); }
+.btn { padding: 12px 24px; border-radius: 10px; border: none; font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 14px; }
+.btn-primary { background: linear-gradient(135deg, var(--green-mid), var(--green-dark)); color: white; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(30,77,46,0.3); }
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { opacity: 0.9; }
+.btn-secondary { background: #f0f0f0; color: var(--text-dark); }
+.btn-secondary:hover { background: #e0e0e0; }
+.btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 6px; }
+.btn-full { width: 100%; }
+.error-text { color: var(--danger); font-size: 13px; margin-top: 8px; display: none; }
+.error-text.show { display: block; }
+
+/* Dashboard layout */
+#admin-dashboard { display: none; }
+.admin-header { background: linear-gradient(to right, var(--green-dark), #1c5c35); padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+.admin-header h1 { font-family: 'Lora', serif; font-size: 18px; color: white; }
+.admin-header h1 span { color: var(--gold); }
+.admin-header .right { display: flex; align-items: center; gap: 12px; }
+.admin-header .admin-name { color: rgba(255,255,255,0.8); font-size: 13px; }
+.admin-layout { display: flex; min-height: calc(100vh - 64px); }
+.sidebar { width: 220px; background: white; border-right: 1px solid var(--border); padding: 20px 0; }
+.sidebar-item { padding: 12px 24px; font-size: 14px; cursor: pointer; color: var(--text-muted); transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
+.sidebar-item:hover { background: #f0faf4; color: var(--green-dark); }
+.sidebar-item.active { background: #e8f5ee; color: var(--green-dark); font-weight: 600; border-right: 3px solid var(--green-mid); }
+.main-content { flex: 1; padding: 32px; max-width: 1100px; }
+.section { display: none; }
+.section.active { display: block; }
+.section-title { font-family: 'Lora', serif; font-size: 22px; color: var(--text-dark); margin-bottom: 24px; }
+
+/* Stats */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+.stat-card { background: white; border-radius: 12px; padding: 20px; border: 1px solid var(--border); }
+.stat-card .number { font-size: 32px; font-weight: 700; color: var(--green-dark); }
+.stat-card .label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+/* Table */
+.table-wrap { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 24px; }
+.table-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.table-header h3 { font-size: 15px; color: var(--text-dark); }
+.search-input { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px; width: 220px; outline: none; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 12px 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); background: #fafafa; border-bottom: 1px solid var(--border); }
+td { padding: 12px 20px; font-size: 13px; color: var(--text-dark); border-bottom: 1px solid #f0f0f0; }
+tr:hover td { background: #fafffe; }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-active { background: #e8f5ee; color: var(--green-dark); }
+.badge-pending { background: #fef9e0; color: #8a6d00; }
+.badge-closed { background: #f0f0f0; color: #888; }
+
+/* Modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+.modal-overlay.show { display: flex; }
+.modal { background: white; border-radius: 16px; padding: 32px; max-width: 550px; width: 90%; max-height: 80vh; overflow-y: auto; }
+.modal h2 { font-family: 'Lora', serif; margin-bottom: 20px; color: var(--text-dark); }
+.modal-actions { display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end; }
+.toast { position: fixed; top: 20px; right: 20px; background: var(--green-dark); color: white; padding: 14px 24px; border-radius: 10px; font-size: 14px; z-index: 2000; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+.toast.show { display: block; animation: fadeIn 0.3s ease; }
+.toast.error { background: var(--danger); }
+
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .sidebar { width: 60px; }
+  .sidebar-item span { display: none; }
+  .admin-layout { flex-direction: column; }
+  .sidebar { width: 100%; flex-direction: row; display: flex; overflow-x: auto; padding: 0; }
+  .sidebar-item { padding: 12px 16px; border-right: none; border-bottom: 3px solid transparent; }
+  .sidebar-item.active { border-right: none; border-bottom: 3px solid var(--green-mid); }
+}
+</style>
+</head>
+<body>
+
+<!-- ADMIN LOGIN -->
+<div id="admin-login">
+  <div class="login-card">
+    <h1>Admin Portal</h1>
+    <p>FUADSI CBT Management System</p>
+    <div class="form-group">
+      <label>Matric / Username</label>
+      <input type="text" id="admin-matric" placeholder="admin" />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="admin-password" placeholder="Enter password" />
+    </div>
+    <button class="btn btn-primary btn-full" onclick="adminLogin()">Sign In</button>
+    <div class="error-text" id="admin-error"></div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="admin-dashboard">
+  <div class="admin-header">
+    <h1>FUADSI <span>CBT Admin</span></h1>
+    <div class="right">
+      <span class="admin-name" id="admin-name-display">Administrator</span>
+      <button class="btn btn-sm btn-secondary" onclick="adminLogout()">Log out</button>
+    </div>
+  </div>
+  <div class="admin-layout">
+    <div class="sidebar">
+      <div class="sidebar-item active" onclick="showSection('overview')">📊 <span>Overview</span></div>
+      <div class="sidebar-item" onclick="showSection('students')">👥 <span>Students</span></div>
+      <div class="sidebar-item" onclick="showSection('courses')">📚 <span>Courses</span></div>
+      <div class="sidebar-item" onclick="showSection('questions')">❓ <span>Questions</span></div>
+      <div class="sidebar-item" onclick="showSection('results')">📋 <span>Results</span></div>
+    </div>
+    <div class="main-content">
+      <!-- OVERVIEW -->
+      <div class="section active" id="sec-overview">
+        <h2 class="section-title">Dashboard Overview</h2>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="number" id="stat-students">0</div><div class="label">Students</div></div>
+          <div class="stat-card"><div class="number" id="stat-courses">0</div><div class="label">Courses</div></div>
+          <div class="stat-card"><div class="number" id="stat-questions">0</div><div class="label">Questions</div></div>
+          <div class="stat-card"><div class="number" id="stat-results">0</div><div class="label">Results</div></div>
+        </div>
+      </div>
+
+      <!-- STUDENTS -->
+      <div class="section" id="sec-students">
+        <h2 class="section-title">Student Management</h2>
+        <div class="table-wrap">
+          <div class="table-header">
+            <h3>All Students</h3>
+            <div style="display:flex;gap:8px">
+              <input class="search-input" id="student-search" placeholder="Search students..." oninput="loadStudents()" />
+              <button class="btn btn-primary btn-sm" onclick="openModal('add-student')">+ Add Student</button>
+              <button class="btn btn-secondary btn-sm" onclick="openModal('bulk-students')">Bulk Import</button>
+            </div>
+          </div>
+          <table><thead><tr><th>Matric</th><th>Name</th><th>Department</th><th>Level</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="students-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- COURSES -->
+      <div class="section" id="sec-courses">
+        <h2 class="section-title">Course Management</h2>
+        <div class="table-wrap">
+          <div class="table-header">
+            <h3>All Courses</h3>
+            <button class="btn btn-primary btn-sm" onclick="openModal('add-course')">+ Add Course</button>
+          </div>
+          <table><thead><tr><th>Code</th><th>Title</th><th>Department</th><th>Units</th><th>Duration</th><th>Questions</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="courses-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- QUESTIONS -->
+      <div class="section" id="sec-questions">
+        <h2 class="section-title">Question Management</h2>
+        <div class="form-group" style="max-width:300px;margin-bottom:20px">
+          <label>Select Course</label>
+          <select id="question-course-select" onchange="loadQuestions()">
+            <option value="">— Select Course —</option>
+          </select>
+        </div>
+        <div class="table-wrap" id="questions-table-wrap" style="display:none">
+          <div class="table-header">
+            <h3 id="questions-table-title">Questions</h3>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-primary btn-sm" onclick="openModal('add-question')">+ Add Question</button>
+              <button class="btn btn-secondary btn-sm" onclick="openModal('bulk-questions')">Bulk Import (JSON)</button>
+            </div>
+          </div>
+          <table><thead><tr><th>#</th><th>Question</th><th>Options</th><th>Answer</th><th>Actions</th></tr></thead>
+          <tbody id="questions-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="section" id="sec-results">
+        <h2 class="section-title">Examination Results</h2>
+        <div class="form-group" style="max-width:300px;margin-bottom:20px">
+          <label>Filter by Course</label>
+          <select id="result-course-filter" onchange="loadResults()">
+            <option value="">All Courses</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><h3>Student Results</h3></div>
+          <table><thead><tr><th>Matric</th><th>Name</th><th>Department</th><th>Course</th><th>Score</th><th>Grade</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody id="results-tbody"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content" onclick="event.stopPropagation()"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '';
+let adminToken = localStorage.getItem('adminToken') || '';
+
+// ── AUTH ─────────────────────────────────────
+async function adminLogin() {
+  const matric = document.getElementById('admin-matric').value.trim();
+  const password = document.getElementById('admin-password').value.trim();
+  const errEl = document.getElementById('admin-error');
+  errEl.classList.remove('show');
+
+  try {
+    const res = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ matric, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    if (data.user.role !== 'admin') throw new Error('Admin access required.');
+
+    adminToken = data.token;
+    localStorage.setItem('adminToken', adminToken);
+    document.getElementById('admin-name-display').textContent = data.user.name;
+    document.getElementById('admin-login').style.display = 'none';
+    document.getElementById('admin-dashboard').style.display = 'block';
+    loadDashboard();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.add('show');
+  }
+}
+
+function adminLogout() {
+  adminToken = '';
+  localStorage.removeItem('adminToken');
+  document.getElementById('admin-dashboard').style.display = 'none';
+  document.getElementById('admin-login').style.display = 'flex';
+}
+
+async function apiFetch(url, opts = {}) {
+  opts.headers = { ...opts.headers, 'Authorization': `Bearer ${adminToken}`, 'Content-Type': 'application/json' };
+  const res = await fetch(`${API}${url}`, opts);
+  if (res.status === 401) { adminLogout(); throw new Error('Session expired'); }
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── NAVIGATION ──────────────────────────────
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  document.getElementById(`sec-${name}`).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (name === 'overview') loadStats();
+  if (name === 'students') loadStudents();
+  if (name === 'courses') { loadCourses(); }
+  if (name === 'questions') { loadCourseSelect(); }
+  if (name === 'results') { loadResultCourseFilter(); loadResults(); }
+}
+
+// ── OVERVIEW ────────────────────────────────
+async function loadStats() {
+  try {
+    const stats = await apiFetch('/api/admin/stats');
+    document.getElementById('stat-students').textContent = stats.studentCount;
+    document.getElementById('stat-courses').textContent = stats.courseCount;
+    document.getElementById('stat-questions').textContent = stats.questionCount;
+    document.getElementById('stat-results').textContent = stats.resultCount;
+  } catch (err) { showToast(err.message, true); }
+}
+
+// ── STUDENTS ────────────────────────────────
+async function loadStudents() {
+  try {
+    const search = document.getElementById('student-search')?.value || '';
+    const students = await apiFetch(`/api/admin/students?search=${encodeURIComponent(search)}`);
+    const tbody = document.getElementById('students-tbody');
+    tbody.innerHTML = students.map(s => `<tr>
+      <td>${s.matric}</td><td>${s.name}</td><td>${s.department}</td><td>${s.level}</td>
+      <td><span class="badge ${s.isActive ? 'badge-active' : 'badge-closed'}">${s.isActive ? 'Active' : 'Inactive'}</span></td>
+      <td>
+        <button class="btn btn-sm btn-secondary" onclick="editStudent('${s._id}','${s.matric}','${s.name}','${s.department}','${s.level}',${s.isActive})">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteStudent('${s._id}')">Delete</button>
+      </td>
+    </tr>`).join('');
+  } catch (err) { showToast(err.message, true); }
+}
+
+function editStudent(id, matric, name, dept, level, isActive) {
+  const html = `<h2>Edit Student</h2>
+    <div class="form-group"><label>Matric</label><input id="m-matric" value="${matric}" disabled /></div>
+    <div class="form-group"><label>Name</label><input id="m-name" value="${name}" /></div>
+    <div class="form-group"><label>Department</label><input id="m-dept" value="${dept}" /></div>
+    <div class="form-group"><label>Level</label><input id="m-level" value="${level}" /></div>
+    <div class="form-group"><label>Active</label><select id="m-active"><option value="true" ${isActive?'selected':''}>Active</option><option value="false" ${!isActive?'selected':''}>Inactive</option></select></div>
+    <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveStudent('${id}')">Save</button></div>`;
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+async function saveStudent(id) {
+  try {
+    await apiFetch(`/api/admin/students/${id}`, { method: 'PUT', body: JSON.stringify({
+      name: document.getElementById('m-name').value,
+      department: document.getElementById('m-dept').value,
+      level: document.getElementById('m-level').value,
+      isActive: document.getElementById('m-active').value === 'true'
+    })});
+    closeModal(); loadStudents(); showToast('Student updated');
+  } catch (err) { showToast(err.message, true); }
+}
+async function deleteStudent(id) {
+  if (!confirm('Delete this student?')) return;
+  try { await apiFetch(`/api/admin/students/${id}`, { method: 'DELETE' }); loadStudents(); showToast('Student deleted'); }
+  catch (err) { showToast(err.message, true); }
+}
+
+// ── COURSES ─────────────────────────────────
+async function loadCourses() {
+  try {
+    const courses = await apiFetch('/api/admin/courses');
+    const tbody = document.getElementById('courses-tbody');
+    tbody.innerHTML = courses.map(c => `<tr>
+      <td>${c.code}</td><td>${c.title}</td><td>${c.department}</td><td>${c.units}</td><td>${c.duration} min</td><td>${c.totalQuestions}</td>
+      <td><span class="badge badge-${c.status}">${c.status}</span></td>
+      <td>
+        <button class="btn btn-sm btn-secondary" onclick='editCourse(${JSON.stringify(c)})'>Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteCourse('${c.courseId}')">Delete</button>
+      </td>
+    </tr>`).join('');
+  } catch (err) { showToast(err.message, true); }
+}
+function editCourse(c) {
+  const html = `<h2>Edit Course</h2>
+    <div class="form-group"><label>Course ID</label><input value="${c.courseId}" disabled /></div>
+    <div class="form-group"><label>Title</label><input id="m-ctitle" value="${c.title}" /></div>
+    <div class="form-group"><label>Code</label><input id="m-ccode" value="${c.code}" /></div>
+    <div class="form-group"><label>Department</label><input id="m-cdept" value="${c.department}" /></div>
+    <div class="form-group"><label>Units</label><input type="number" id="m-cunits" value="${c.units}" /></div>
+    <div class="form-group"><label>Duration (min)</label><input type="number" id="m-cdur" value="${c.duration}" /></div>
+    <div class="form-group"><label>Status</label><select id="m-cstatus"><option value="active" ${c.status==='active'?'selected':''}>Active</option><option value="pending" ${c.status==='pending'?'selected':''}>Pending</option><option value="closed" ${c.status==='closed'?'selected':''}>Closed</option></select></div>
+    <div class="form-group"><label>Allow Retake</label><select id="m-cretake"><option value="false" ${!c.allowRetake?'selected':''}>No</option><option value="true" ${c.allowRetake?'selected':''}>Yes</option></select></div>
+    <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveCourse('${c.courseId}')">Save</button></div>`;
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+async function saveCourse(courseId) {
+  try {
+    await apiFetch(`/api/admin/courses/${courseId}`, { method: 'PUT', body: JSON.stringify({
+      title: document.getElementById('m-ctitle').value,
+      code: document.getElementById('m-ccode').value,
+      department: document.getElementById('m-cdept').value,
+      units: parseInt(document.getElementById('m-cunits').value),
+      duration: parseInt(document.getElementById('m-cdur').value),
+      status: document.getElementById('m-cstatus').value,
+      allowRetake: document.getElementById('m-cretake').value === 'true'
+    })});
+    closeModal(); loadCourses(); showToast('Course updated');
+  } catch (err) { showToast(err.message, true); }
+}
+async function deleteCourse(courseId) {
+  if (!confirm('Delete this course and all its questions?')) return;
+  try { await apiFetch(`/api/admin/courses/${courseId}`, { method: 'DELETE' }); loadCourses(); showToast('Course deleted'); }
+  catch (err) { showToast(err.message, true); }
+}
+
+// ── QUESTIONS ───────────────────────────────
+async function loadCourseSelect() {
+  try {
+    const courses = await apiFetch('/api/admin/courses');
+    const sel = document.getElementById('question-course-select');
+    sel.innerHTML = '<option value="">— Select Course —</option>' + courses.map(c => `<option value="${c.courseId}">${c.code} — ${c.title}</option>`).join('');
+  } catch (err) { showToast(err.message, true); }
+}
+async function loadQuestions() {
+  const courseId = document.getElementById('question-course-select').value;
+  const wrap = document.getElementById('questions-table-wrap');
+  if (!courseId) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  document.getElementById('questions-table-title').textContent = `Questions — ${courseId}`;
+  try {
+    const questions = await apiFetch(`/api/admin/questions/${courseId}`);
+    const tbody = document.getElementById('questions-tbody');
+    tbody.innerHTML = questions.map((q, i) => `<tr>
+      <td>${i + 1}</td>
+      <td style="max-width:300px">${q.q}</td>
+      <td style="font-size:12px">${q.options.map((o,j) => `${j === q.a ? '<b>' : ''}${o}${j === q.a ? '</b>' : ''}`).join('<br>')}</td>
+      <td>${q.options[q.a]}</td>
+      <td>
+        <button class="btn btn-sm btn-secondary" onclick='editQuestion(${JSON.stringify(q).replace(/'/g, "\\'")})'>Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteQuestion('${q._id}')">Delete</button>
+      </td>
+    </tr>`).join('');
+  } catch (err) { showToast(err.message, true); }
+}
+function editQuestion(q) {
+  const html = `<h2>Edit Question</h2>
+    <div class="form-group"><label>Question</label><textarea id="m-qq" rows="3">${q.q}</textarea></div>
+    ${q.options.map((o, i) => `<div class="form-group"><label>Option ${i + 1}</label><input id="m-qopt${i}" value="${o}" /></div>`).join('')}
+    <div class="form-group"><label>Correct Answer (index, 0-based)</label><input type="number" id="m-qa" value="${q.a}" min="0" max="${q.options.length - 1}" /></div>
+    <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveQuestion('${q._id}', ${q.options.length})">Save</button></div>`;
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+async function saveQuestion(id, optCount) {
+  try {
+    const options = [];
+    for (let i = 0; i < optCount; i++) options.push(document.getElementById(`m-qopt${i}`).value);
+    await apiFetch(`/api/admin/questions/${id}`, { method: 'PUT', body: JSON.stringify({
+      q: document.getElementById('m-qq').value,
+      options,
+      a: parseInt(document.getElementById('m-qa').value)
+    })});
+    closeModal(); loadQuestions(); showToast('Question updated');
+  } catch (err) { showToast(err.message, true); }
+}
+async function deleteQuestion(id) {
+  if (!confirm('Delete this question?')) return;
+  try { await apiFetch(`/api/admin/questions/${id}`, { method: 'DELETE' }); loadQuestions(); showToast('Question deleted'); }
+  catch (err) { showToast(err.message, true); }
+}
+
+// ── RESULTS ─────────────────────────────────
+async function loadResultCourseFilter() {
+  try {
+    const courses = await apiFetch('/api/admin/courses');
+    const sel = document.getElementById('result-course-filter');
+    sel.innerHTML = '<option value="">All Courses</option>' + courses.map(c => `<option value="${c.courseId}">${c.code} — ${c.title}</option>`).join('');
+  } catch (err) { showToast(err.message, true); }
+}
+async function loadResults() {
+  try {
+    const courseId = document.getElementById('result-course-filter')?.value || '';
+    const url = courseId ? `/api/admin/results?courseId=${courseId}` : '/api/admin/results';
+    const results = await apiFetch(url);
+    const tbody = document.getElementById('results-tbody');
+    tbody.innerHTML = results.map(r => `<tr>
+      <td>${r.studentId?.matric || 'N/A'}</td>
+      <td>${r.studentId?.name || 'N/A'}</td>
+      <td>${r.studentId?.department || 'N/A'}</td>
+      <td>${r.courseCode}</td>
+      <td>${r.percentage}%</td>
+      <td><span class="badge ${r.percentage >= 50 ? 'badge-active' : 'badge-closed'}">${r.grade}</span></td>
+      <td>${new Date(r.createdAt).toLocaleDateString()}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="deleteResult('${r._id}')">Reset</button></td>
+    </tr>`).join('');
+  } catch (err) { showToast(err.message, true); }
+}
+async function deleteResult(id) {
+  if (!confirm('Reset this result? Student will be able to retake.')) return;
+  try { await apiFetch(`/api/admin/results/${id}`, { method: 'DELETE' }); loadResults(); showToast('Result reset'); }
+  catch (err) { showToast(err.message, true); }
+}
+
+// ── MODALS ──────────────────────────────────
+function openModal(type) {
+  const mc = document.getElementById('modal-content');
+  if (type === 'add-student') {
+    mc.innerHTML = `<h2>Add Student</h2>
+      <div class="form-group"><label>Matric Number</label><input id="m-matric" /></div>
+      <div class="form-group"><label>Full Name</label><input id="m-name" /></div>
+      <div class="form-group"><label>Department</label><input id="m-dept" /></div>
+      <div class="form-group"><label>Level</label><input id="m-level" value="100" /></div>
+      <div class="form-group"><label>Password</label><input id="m-pass" /></div>
+      <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="addStudent()">Create</button></div>`;
+  } else if (type === 'bulk-students') {
+    mc.innerHTML = `<h2>Bulk Import Students</h2>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Paste a JSON array of students. Each must have: matric, name, department. Optional: level, password (defaults to matric).</p>
+      <div class="form-group"><label>JSON Data</label><textarea id="m-bulk-json" rows="8" placeholder='[{"matric":"001","name":"John","department":"Economics"}]'></textarea></div>
+      <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="bulkAddStudents()">Import</button></div>`;
+  } else if (type === 'add-course') {
+    mc.innerHTML = `<h2>Add Course</h2>
+      <div class="form-group"><label>Course ID (e.g. ECO101)</label><input id="m-cid" /></div>
+      <div class="form-group"><label>Title</label><input id="m-ctitle" /></div>
+      <div class="form-group"><label>Code (e.g. ECO 101)</label><input id="m-ccode" /></div>
+      <div class="form-group"><label>Department</label><input id="m-cdept" /></div>
+      <div class="form-group"><label>Units</label><input type="number" id="m-cunits" value="2" /></div>
+      <div class="form-group"><label>Duration (minutes)</label><input type="number" id="m-cdur" value="30" /></div>
+      <div class="form-group"><label>Status</label><select id="m-cstatus"><option value="pending">Pending</option><option value="active">Active</option></select></div>
+      <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="addCourse()">Create</button></div>`;
+  } else if (type === 'add-question') {
+    mc.innerHTML = `<h2>Add Question</h2>
+      <div class="form-group"><label>Question</label><textarea id="m-qq" rows="3"></textarea></div>
+      <div class="form-group"><label>Option A</label><input id="m-qopt0" /></div>
+      <div class="form-group"><label>Option B</label><input id="m-qopt1" /></div>
+      <div class="form-group"><label>Option C</label><input id="m-qopt2" /></div>
+      <div class="form-group"><label>Option D</label><input id="m-qopt3" /></div>
+      <div class="form-group"><label>Correct Answer Index (0=A, 1=B, 2=C, 3=D)</label><input type="number" id="m-qa" value="0" min="0" max="3" /></div>
+      <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="addQuestion()">Add</button></div>`;
+  } else if (type === 'bulk-questions') {
+    mc.innerHTML = `<h2>Bulk Import Questions (JSON)</h2>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Paste a JSON array. Each item: { "q": "...", "options": ["A","B","C","D"], "a": 0 }</p>
+      <div class="form-group"><label>JSON Data</label><textarea id="m-bulk-q-json" rows="10" placeholder='[{"q":"Question?","options":["A","B","C","D"],"a":0}]'></textarea></div>
+      <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="bulkAddQuestions()">Import</button></div>`;
+  }
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+
+// ── MODAL ACTIONS ───────────────────────────
+async function addStudent() {
+  try {
+    await apiFetch('/api/admin/students', { method: 'POST', body: JSON.stringify({
+      matric: document.getElementById('m-matric').value,
+      name: document.getElementById('m-name').value,
+      department: document.getElementById('m-dept').value,
+      level: document.getElementById('m-level').value,
+      password: document.getElementById('m-pass').value
+    })});
+    closeModal(); loadStudents(); showToast('Student created');
+  } catch (err) { showToast(err.message, true); }
+}
+async function bulkAddStudents() {
+  try {
+    const students = JSON.parse(document.getElementById('m-bulk-json').value);
+    const result = await apiFetch('/api/admin/students/bulk', { method: 'POST', body: JSON.stringify({ students }) });
+    closeModal(); loadStudents();
+    showToast(`Created ${result.created} students. ${result.errors.length} errors.`);
+  } catch (err) { showToast(err.message, true); }
+}
+async function addCourse() {
+  try {
+    await apiFetch('/api/admin/courses', { method: 'POST', body: JSON.stringify({
+      courseId: document.getElementById('m-cid').value,
+      title: document.getElementById('m-ctitle').value,
+      code: document.getElementById('m-ccode').value,
+      department: document.getElementById('m-cdept').value,
+      units: parseInt(document.getElementById('m-cunits').value),
+      duration: parseInt(document.getElementById('m-cdur').value),
+      status: document.getElementById('m-cstatus').value
+    })});
+    closeModal(); loadCourses(); showToast('Course created');
+  } catch (err) { showToast(err.message, true); }
+}
+async function addQuestion() {
+  try {
+    const courseId = document.getElementById('question-course-select').value;
+    if (!courseId) throw new Error('Select a course first');
+    await apiFetch('/api/admin/questions', { method: 'POST', body: JSON.stringify({
+      courseId,
+      q: document.getElementById('m-qq').value,
+      options: [0,1,2,3].map(i => document.getElementById(`m-qopt${i}`).value),
+      a: parseInt(document.getElementById('m-qa').value)
+    })});
+    closeModal(); loadQuestions(); showToast('Question added');
+  } catch (err) { showToast(err.message, true); }
+}
+async function bulkAddQuestions() {
+  try {
+    const courseId = document.getElementById('question-course-select').value;
+    if (!courseId) throw new Error('Select a course first');
+    const questions = JSON.parse(document.getElementById('m-bulk-q-json').value);
+    const result = await apiFetch('/api/admin/questions/bulk', { method: 'POST', body: JSON.stringify({ courseId, questions }) });
+    closeModal(); loadQuestions();
+    showToast(`Added ${result.added} questions. ${result.errors.length} errors. Total: ${result.totalQuestions}`);
+  } catch (err) { showToast(err.message, true); }
+}
+
+// ── INIT ────────────────────────────────────
+async function loadDashboard() {
+  loadStats();
+}
+
+// Auto-login check
+document.addEventListener('DOMContentLoaded', async () => {
+  if (adminToken) {
+    try {
+      const data = await apiFetch('/api/auth/me');
+      if (data.user.role === 'admin') {
+        document.getElementById('admin-name-display').textContent = data.user.name;
+        document.getElementById('admin-login').style.display = 'none';
+        document.getElementById('admin-dashboard').style.display = 'block';
+        loadDashboard();
+      } else { adminLogout(); }
+    } catch { adminLogout(); }
+  }
+});
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && document.getElementById('admin-login').style.display !== 'none') adminLogin(); });
+</script>
+</body>
+</html>
